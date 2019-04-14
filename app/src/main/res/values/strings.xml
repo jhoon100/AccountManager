@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">MyAccountManager</string>
+    <string name="titleName">급여 가계부</string>
+    <string name="titleTime">근무시간</string>
+    <string name="titleAmount">근무금액</string>
+    <string name="labelWon">원</string>
+    <string name="labelMinute">분</string>
+    <string name="labelHour">시</string>
+    <string name="title_activity_calender">CalenderActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+</resources>
