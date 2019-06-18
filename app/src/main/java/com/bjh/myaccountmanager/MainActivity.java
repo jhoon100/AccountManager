@@ -23,8 +23,17 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    public String CHOICE_DAY;
-    public boolean MODY_CHK = false;    // 등록 / 수정 체크
+    SQLiteOpenHelper databaseHelper;
+    SQLiteDatabase db;
+
+    String CHOICE_DAY;
+    boolean MOD_CHK = false;    // 등록 / 수정 체크
+
+    int preMonth;    // 이전 선택 월
+
+    int chooseYear;         // 선택 년
+    int chooseMonth;        // 선택 월
+    int chooseDayOfMonth;   // 선택 일
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,12 +45,31 @@ public class MainActivity extends AppCompatActivity {
         // 저장 버튼
         Button btnSave = (Button) findViewById(R.id.btnSave);
 
-        getTotalInfoToMonth(calendarView);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        String selectedDate = sdf.format(new Date(calendarView.getDate()));
+
+        chooseYear = Integer.parseInt(selectedDate.substring(0, 4));
+        chooseMonth = Integer.parseInt(selectedDate.substring(5, 6));
+        chooseDayOfMonth = Integer.parseInt(selectedDate.substring(6, 8));
+
+        // 월 근무 시간 및 근무 금액 조회
+        getTotalInfoToMonth(chooseYear, chooseMonth, chooseDayOfMonth);
 
         // 달력 날짜 선택 이벤트
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
+
+                chooseYear = year;              // 선택 년도
+                chooseMonth = (month+1);        // 선택 월
+                chooseDayOfMonth = dayOfMonth;  // 선택 일
+
+                if(preMonth != chooseMonth){
+                    // 월 근무 시간 및 근무 금액 조회
+                    getTotalInfoToMonth(year, (month+1), dayOfMonth);
+                }
+
+                preMonth = chooseMonth;         // 이전 선택 월 값 세팅
 
                 String titleDate = year+"년 "+(month+1)+"월 "+dayOfMonth+"일";
 
@@ -51,10 +79,10 @@ public class MainActivity extends AppCompatActivity {
 
                 CHOICE_DAY = year+""+((month+1)<10?"0"+(month+1):(month+1))+""+dayOfMonth;
 
-                final SQLiteOpenHelper databaseHelper = new DatabaseHelper(getApplicationContext());
+                databaseHelper = new DatabaseHelper(getApplicationContext());
 
                 try{
-                    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+                    db = databaseHelper.getReadableDatabase();
                     Cursor cursor = db.query(DatabaseColumns._TABLENAME1, new String[]{DatabaseColumns.WORK_TIME, DatabaseColumns.WORK_AMOUNT}, DatabaseColumns.WORK_DAY+" = ?", new String[]{CHOICE_DAY}, null, null, null);
 
                     // 일 근무 시간
@@ -68,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
                             txtDailyAmount.setText(cursor.getString(1));
                         }
 
-                        MODY_CHK = true;
+                        MOD_CHK = true;
                     } else {
                         txtDailyTimes.setText("");
                         txtDailyAmount.setText("");
-                        MODY_CHK = false;
+                        MOD_CHK = false;
                     }
 
                     cursor.close();
@@ -90,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                final SQLiteOpenHelper databaseHelper = new DatabaseHelper(getApplicationContext());
+                databaseHelper = new DatabaseHelper(getApplicationContext());
 
                 boolean chk = true;
 
@@ -111,11 +139,11 @@ public class MainActivity extends AppCompatActivity {
 
                 if(chk){
                     try{
-                        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+                        db = databaseHelper.getReadableDatabase();
 
                         long retVal;
 
-                        if(MODY_CHK){   // 수정
+                        if(MOD_CHK){   // 수정
                             retVal = updateDailyColumn(db, CHOICE_DAY, txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString()));
                         } else {        // 등록
                             retVal = insertDailyColumn(db, CHOICE_DAY, txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString()));
@@ -125,6 +153,9 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "FAIL", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(getApplicationContext(), "SUCCESS", Toast.LENGTH_SHORT).show();
+
+                            // 월 근무 시간 및 근무 금액 조회
+                            getTotalInfoToMonth(chooseYear, chooseMonth, chooseDayOfMonth);
                         }
 
                     } catch(SQLiteException e){
@@ -134,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
 
     /**
      * Base insert
@@ -199,21 +229,27 @@ public class MainActivity extends AppCompatActivity {
         return db.update(DatabaseColumns._TABLENAME1, values, DatabaseColumns.WORK_DAY+" = ?", new String[]{workDay});
     }
 
-    public void getTotalInfoToMonth(CalendarView calendarView){
+    /**
+     * 상단 월 전체 근무 시간 및 금액 출력 처리
+     * @param chooseYear
+     * @param chooseMonth
+     * @param chooseDayOfMonth
+     */
+    public void getTotalInfoToMonth(int chooseYear, int chooseMonth, int chooseDayOfMonth){
 
-        final SQLiteOpenHelper databaseHelper = new DatabaseHelper(getApplicationContext());
+        String startDate = String.valueOf(chooseYear) + (chooseMonth<10?"0"+chooseMonth:chooseMonth) + "01";
+        String endDate = String.valueOf(chooseYear) + (chooseMonth<10?"0"+chooseMonth:chooseMonth) + "31";
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-        String selectedDate = sdf.format(new Date(calendarView.getDate()));
+        TextView txtSumTimes = (TextView) findViewById(R.id.txtSumTimes);
+        TextView txtSumAmount = (TextView) findViewById(R.id.txtSumAmount);
 
-        String startDate = selectedDate.substring(0, 6)+"01";
-        String endDate = selectedDate.substring(0, 6)+"31";
+        databaseHelper = new DatabaseHelper(getApplicationContext());
 
         try{
-            SQLiteDatabase db = databaseHelper.getReadableDatabase();
+            db = databaseHelper.getReadableDatabase();
             Cursor cursor = db.query(DatabaseColumns._TABLENAME1, new String[]{DatabaseColumns.WORK_TIME, DatabaseColumns.WORK_AMOUNT}, DatabaseColumns.WORK_DAY+" >= ? and "+DatabaseColumns.WORK_DAY+" <= ?", new String[]{startDate, endDate}, null, null, null);
 
-            if(cursor != null && cursor.getCount() > 0){
+            if(cursor.getCount() > 0){
 
                 int intSumTime = 0;
                 int intSumAmt = 0;
@@ -226,11 +262,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                TextView txtSumTimes = (TextView) findViewById(R.id.txtSumTimes);
-                TextView txtSumAmount = (TextView) findViewById(R.id.txtSumAmount);
-
                 txtSumTimes.setText(String.valueOf(intSumTime));
                 txtSumAmount.setText(String.valueOf(intSumAmt));
+            } else {
+                txtSumTimes.setText("");
+                txtSumAmount.setText("");
             }
 
             cursor.close();
