@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         // 월, 일 시간 명 세팅 ( 시 or 분 )
         setTimeSectionName();
 
-        String titleDate = chooseYear + "년 " + chooseMonth + " 월" + chooseDayOfMonth + "일";
+        String titleDate = chooseYear + "년 " + chooseMonth + "월 " + chooseDayOfMonth + "일";
 
         // 달력에 일자 선택 시 상세 정보에 일 세팅
         TextView dailyTitle = (TextView) findViewById(R.id.txtDaily);
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
                 preMonth = chooseMonth;         // 이전 선택 월 값 세팅
 
-                String titleDate = year + "년 " + (month+1) + " 월" + dayOfMonth + "일";
+                String titleDate = year + "년 " + (month+1) + "월 " + dayOfMonth + "일";
 
                 // 달력에 일자 선택 시 상세 정보에 일 세팅
                 TextView dailyTitle = (TextView) findViewById(R.id.txtDaily);
