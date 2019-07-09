@@ -5,6 +5,8 @@
     <string name="titleTime">월 근무시간</string>
     <string name="titleAmount">월 근무금액</string>
 
+    <string name="titleStatistics">통계</string>
+
     <string name="dailyTitleTime">일 근무시간</string>
     <string name="dailyTitleAmount">일 근무금액</string>
 
@@ -34,4 +36,11 @@
 
     <string name="msgDailyValidationTime">근무 시간을 입력하세요.</string>
     <string name="msgDailyValidationAmount">근무 금액을 입력하세요.</string>
+
+    <string name="msgChooseDay">달력에서 입력할 날짜를 선택해주세요.</string>
+
+    <string name="srhBaseTitle">조회 기준</string>
+
+    <string name="srhSection"> ~ </string>
+    <string name="buttonSrh">조회</string>
 </resources>
