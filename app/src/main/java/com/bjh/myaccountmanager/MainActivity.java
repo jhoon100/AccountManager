@@ -3,6 +3,7 @@ package com.bjh.myaccountmanager;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     Button btnSave;                 // 일 저장 버튼
 
     ImageButton btnSetting;         // 기본 세팅 버튼
+    ImageButton btnStatistics;      // 통계 버튼
 
     private TextView dailyTitle;            // 일자 선택 시 title
 
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnSave = (Button) findViewById(R.id.btnSave);                  // 저장 버튼
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);       // 기본 세팅 버튼
+        btnStatistics = (ImageButton) findViewById(R.id.btnStatistics); // 통계 버튼
 
         dailyTitle = (TextView) findViewById(R.id.txtDaily);            // 일 상세 타이틀
 
@@ -323,6 +326,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // 통계 버튼 클릭
+        btnStatistics.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent statisticsIntent = new Intent(getApplicationContext(), StatisticsActivity.class);
+                startActivity(statisticsIntent);
+            }
+        });
+
+        // 시간 대비 금액 자동 계산 ( 포커스 변경 시 )
         txtDailyTimes.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {

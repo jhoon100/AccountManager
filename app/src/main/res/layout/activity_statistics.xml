@@ -6,9 +6,10 @@
     android:padding="5dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,21 +23,6 @@
                 android:text="@string/titleStatistics"
                 android:textSize="30sp"
                 android:textStyle="bold" />
-
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageButton
-                    android:id="@+id/btnSetting"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/settings"
-                    android:padding="0dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="5dp"/>
-
-            </GridLayout>
 
         </LinearLayout>
 
@@ -88,7 +74,7 @@
 
             <Button
                 android:id="@+id/btnSave"
-                android:layout_width="70sp"
+                android:layout_width="50sp"
                 android:layout_height="30sp"
                 android:text="@string/buttonSrh"
                 android:textSize="15sp"
@@ -96,14 +82,9 @@
                 android:background="@color/btnColor"
                 android:textColor="@color/white"
                 android:layout_gravity="center"
-                android:layout_margin="10dp"/>
+                android:layout_margin="5dp"/>
 
         </LinearLayout>
-
-        <fragment
-            android:id="@+id/fragmentContent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
