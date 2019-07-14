@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton btnStatistics;      // 통계 버튼
 
     private TextView dailyTitle;            // 일자 선택 시 title
+    private TextView monthTitle;            // 월별 근무시간 금액 title
 
     private EditText txtDailyTimes;         // 일 근무 시간
     private EditText txtDailyAmount;        // 일 근무 금액
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         btnStatistics = (ImageButton) findViewById(R.id.btnStatistics); // 통계 버튼
 
         dailyTitle = (TextView) findViewById(R.id.txtDaily);            // 일 상세 타이틀
+        monthTitle = (TextView) findViewById(R.id.monthTitle);          // 월별 근무시간 금액 title
 
         txtDailyTimes = (EditText) findViewById(R.id.txtDailyTimes);    // 일 근무 시간
         txtDailyAmount = (EditText) findViewById(R.id.txtDailyAmount);  // 일 근무 금액
@@ -104,9 +106,13 @@ public class MainActivity extends AppCompatActivity {
                 preMonth = chooseMonth;         // 이전 선택 월 값 세팅
 
                 String titleDate = year + "년 " + (month+1) + "월 " + dayOfMonth + "일";
+                String titleMonth = (month+1) + " 월 ";
 
                 // 달력에 일자 선택 시 상세 정보에 일 세팅
                 dailyTitle.setText(titleDate);
+
+                // 월별 근무시간 / 금액 타이틀 세팅
+                monthTitle.setText(titleMonth);
 
                 CHOICE_DAY = year+""+((month+1)<10?"0"+(month+1):(month+1))+""+dayOfMonth;
 
@@ -417,6 +423,11 @@ public class MainActivity extends AppCompatActivity {
      * @param chooseDayOfMonth
      */
     public void getTotalInfoToMonth(int chooseYear, int chooseMonth, int chooseDayOfMonth){
+
+        String strMonthTitle = chooseMonth + " 월 ";
+
+        // 월별 근무시간 / 금액 타이틀 세팅
+        monthTitle.setText(strMonthTitle);
 
         String startDate = String.valueOf(chooseYear) + (chooseMonth<10?"0"+chooseMonth:chooseMonth) + "01";
         String endDate = String.valueOf(chooseYear) + (chooseMonth<10?"0"+chooseMonth:chooseMonth) + "31";

@@ -2,13 +2,10 @@
     <string name="app_name">MyAccountManager</string>
 
     <string name="titleName">급여 가계부</string>
-    <string name="titleTime">월 근무시간</string>
-    <string name="titleAmount">월 근무금액</string>
+    <string name="titleTime">근무시간</string>
+    <string name="titleAmount">근무금액</string>
 
     <string name="titleStatistics">통계</string>
-
-    <string name="dailyTitleTime">일 근무시간</string>
-    <string name="dailyTitleAmount">일 근무금액</string>
 
     <string name="baseTimeSelect">기준 시/분</string>
     <string name="baseTime">기준 시간</string>
