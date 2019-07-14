@@ -2,6 +2,7 @@ package com.bjh.myaccountmanager.util;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -26,5 +27,32 @@ public class StringUtil {
     public static String getDateYYYYMMDD(long strArgValue){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
         return sdf.format(new Date(strArgValue));
+    }
+
+    /**
+     * 현재 년도 반환
+     * @return
+     */
+    public static String getCurYear(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy", Locale.getDefault());
+        return format.format(Calendar.getInstance().getTime());
+    }
+
+    /**
+     * 현재 월 반환
+     * @return
+     */
+    public static String getCurMonth(){
+        SimpleDateFormat format = new SimpleDateFormat("MM", Locale.getDefault());
+        return format.format(Calendar.getInstance().getTime());
+    }
+
+    /**
+     * 현재 일 반환
+     * @return
+     */
+    public static String getCurDay(){
+        SimpleDateFormat format = new SimpleDateFormat("dd", Locale.getDefault());
+        return format.format(Calendar.getInstance().getTime());
     }
 }

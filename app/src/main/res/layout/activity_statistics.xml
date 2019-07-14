@@ -30,7 +30,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_gravity="center">
+            android:layout_gravity="start">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/baseYearMonth"
+                android:textStyle="bold"
+                android:gravity="center"/>
 
             <RadioGroup
                 android:layout_width="wrap_content"
@@ -43,6 +50,7 @@
                     android:id="@+id/radioSrhYear"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:checked="true"
                     android:text="@string/year"/>
 
                 <RadioButton
@@ -52,6 +60,14 @@
                     android:text="@string/month"/>
 
             </RadioGroup>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
 
             <EditText
                 android:id="@+id/txtSrhStartDate"
