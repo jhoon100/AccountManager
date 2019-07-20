@@ -89,7 +89,7 @@
                 android:ems="5"/>
 
             <Button
-                android:id="@+id/btnSave"
+                android:id="@+id/btnSearch"
                 android:layout_width="50sp"
                 android:layout_height="30sp"
                 android:text="@string/buttonSrh"
