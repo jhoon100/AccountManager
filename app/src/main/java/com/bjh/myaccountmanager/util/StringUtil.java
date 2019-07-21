@@ -30,6 +30,16 @@ public class StringUtil {
     }
 
     /**
+     * 날짜포맷 yyyy 형식으로 리턴
+     * @param strArgValue
+     * @return
+     */
+    public static String getDateYYYY(long strArgValue){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy", Locale.getDefault());
+        return sdf.format(new Date(strArgValue));
+    }
+
+    /**
      * 현재 년도 반환
      * @return
      */

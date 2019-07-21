@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 // 월별 근무시간 / 금액 타이틀 세팅
                 monthTitle.setText(titleMonth);
 
-                CHOICE_DAY = year+""+((month+1)<10?"0"+(month+1):(month+1))+""+dayOfMonth;
+                CHOICE_DAY = year+""+((month+1)<10?"0"+(month+1):(month+1))+""+(dayOfMonth<10?"0"+dayOfMonth:dayOfMonth);
 
                 try{
                     db = databaseHelper.getReadableDatabase();

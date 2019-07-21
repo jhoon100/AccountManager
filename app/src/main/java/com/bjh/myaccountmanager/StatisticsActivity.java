@@ -1,6 +1,10 @@
 package com.bjh.myaccountmanager;
 
 import android.app.DatePickerDialog;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -8,10 +12,16 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bjh.myaccountmanager.db.DatabaseColumns;
+import com.bjh.myaccountmanager.db.DatabaseHelper;
 import com.bjh.myaccountmanager.util.StringUtil;
 
 public class StatisticsActivity extends AppCompatActivity{
+
+    SQLiteOpenHelper databaseHelper;
+    SQLiteDatabase db;
 
     TextView txtSrhStartDate;       // 조회 시작일
     TextView txtSrhEndDate;         // 조회 종료일
@@ -35,6 +45,8 @@ public class StatisticsActivity extends AppCompatActivity{
         radioSrhMonth = (RadioButton) findViewById(R.id.radioSrhMonth);
 
         btnSearch = (Button) findViewById(R.id.btnSearch);
+
+        databaseHelper = new DatabaseHelper(getApplicationContext());
 
         // 조회 시작일
         String strPreDate;
@@ -77,6 +89,42 @@ public class StatisticsActivity extends AppCompatActivity{
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                String strShowColQuery;
+                String strGroupByQuery;
+
+                String strStartDate = txtSrhStartDate.getText().toString().replaceAll("-", "");
+                String strEndDate = txtSrhEndDate.getText().toString().replaceAll("-", "");
+
+                if(strRadioSrhChoose.equals("YEAR")){   // 년별
+                    strShowColQuery = "SUBSTR("+DatabaseColumns.WORK_DAY+", 1, 4) AS WORK_YEAR, SUM("+DatabaseColumns.WORK_TIME+") AS WORK_TIME, SUM("+DatabaseColumns.WORK_AMOUNT+") AS WORK_AMOUNT";
+                    strGroupByQuery = "GROUP BY SUBSTR("+DatabaseColumns.WORK_DAY+", 1, 4)";
+                } else {    // 월별
+                    strShowColQuery = "SUBSTR("+DatabaseColumns.WORK_DAY+", 1, 6) AS WORK_YEAR, SUM("+DatabaseColumns.WORK_TIME+") AS WORK_TIME, SUM("+DatabaseColumns.WORK_AMOUNT+") AS WORK_AMOUNT";
+                    strGroupByQuery = "GROUP BY SUBSTR("+DatabaseColumns.WORK_DAY+", 1, 6)";
+                }
+
+                String strQuery = "SELECT "+ strShowColQuery + " FROM " + DatabaseColumns._TABLENAME1 + " WHERE " + DatabaseColumns.WORK_DAY+" >= ? and "+DatabaseColumns.WORK_DAY+" <= ? " + strGroupByQuery;
+
+                try{
+                    db = databaseHelper.getReadableDatabase();
+                    Cursor cursor = db.rawQuery(strQuery, new String[]{strStartDate, strEndDate});
+
+                    if(cursor.getCount() > 0){
+                        for(int i=0; i<cursor.getCount(); i++){
+                            if(cursor.moveToNext()){
+                                System.out.println("=====>> "+ cursor.getInt(0));
+                                System.out.println("=====>> "+ cursor.getInt(1));
+                                System.out.println("=====>> "+ cursor.getInt(2));
+                            }
+                        }
+                    }
+
+                    cursor.close();
+                    db.close();
+                } catch(SQLiteException ex){
+                    Toast.makeText(getApplicationContext(), "Database unavailable btnSearch.setOnClickListener()", Toast.LENGTH_SHORT).show();
+                }
 
             }
         });
