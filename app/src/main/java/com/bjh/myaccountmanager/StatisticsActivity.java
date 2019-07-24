@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -14,9 +16,12 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bjh.myaccountmanager.adapter.StatRecyclerAdapter;
 import com.bjh.myaccountmanager.db.DatabaseColumns;
 import com.bjh.myaccountmanager.db.DatabaseHelper;
 import com.bjh.myaccountmanager.util.StringUtil;
+
+import java.util.ArrayList;
 
 public class StatisticsActivity extends AppCompatActivity{
 
@@ -48,23 +53,28 @@ public class StatisticsActivity extends AppCompatActivity{
 
         databaseHelper = new DatabaseHelper(getApplicationContext());
 
-        // 조회 시작일
-        String strPreDate;
+        // 날짜 입력항목 선택시 키보드 안올라오게 세팅
+        txtSrhStartDate.setInputType(0);
+        txtSrhEndDate.setInputType(0);
 
-        // 현재 년월일 yyyy-MM-dd
-        String currentDate = StringUtil.getCurYear() + "-" + StringUtil.getCurMonth() + "-" + StringUtil.getCurDay();
+        // 기준년월 default 세팅
+        searchRadioButtonClickChk();
 
-        if(radioSrhYear.isChecked()){
-            strPreDate = (Integer.valueOf(StringUtil.getCurYear()) - 3) + "-01-01";
-            strRadioSrhChoose = "YEAR";
-            txtSrhStartDate.setText(strPreDate);
-            txtSrhEndDate.setText(currentDate);
-        } else if(radioSrhMonth.isChecked()){
-            strPreDate = (Integer.valueOf(StringUtil.getCurYear()) - 1) + "-01-01";
-            strRadioSrhChoose = "MONTH";
-            txtSrhStartDate.setText(strPreDate);
-            txtSrhEndDate.setText(currentDate);
-        }
+        // 기준년월 년 선택 시 값 세팅
+        radioSrhYear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchRadioButtonClickChk();
+            }
+        });
+
+        // 기준년월 월 선택 시 값 세팅
+        radioSrhMonth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchRadioButtonClickChk();
+            }
+        });
 
         // 통계 조회 시작일 선택 시 달력 팝업 실행 후 선택하면 선택된 데이터 입력 처리
         txtSrhStartDate.setOnClickListener(new View.OnClickListener() {
@@ -106,16 +116,29 @@ public class StatisticsActivity extends AppCompatActivity{
 
                 String strQuery = "SELECT "+ strShowColQuery + " FROM " + DatabaseColumns._TABLENAME1 + " WHERE " + DatabaseColumns.WORK_DAY+" >= ? and "+DatabaseColumns.WORK_DAY+" <= ? " + strGroupByQuery;
 
+                ArrayList<String> staticsList = new ArrayList<>();
+
                 try{
                     db = databaseHelper.getReadableDatabase();
                     Cursor cursor = db.rawQuery(strQuery, new String[]{strStartDate, strEndDate});
 
                     if(cursor.getCount() > 0){
+
                         for(int i=0; i<cursor.getCount(); i++){
                             if(cursor.moveToNext()){
-                                System.out.println("=====>> "+ cursor.getInt(0));
-                                System.out.println("=====>> "+ cursor.getInt(1));
-                                System.out.println("=====>> "+ cursor.getInt(2));
+
+                                String strListData;
+
+                                if(strRadioSrhChoose.equals("YEAR")){
+                                    strListData = cursor.getInt(0) + "년    " + cursor.getInt(1) + "시간    " + StringUtil.convertNumberToComma(cursor.getString(2)) + "원";
+                                } else {
+
+                                    String tmpDate = cursor.getString(0);
+
+                                    strListData = tmpDate.substring(0, 4) + "년 " + tmpDate.substring(4, 6) + "월    " + cursor.getInt(1) + "시간    " + StringUtil.convertNumberToComma(cursor.getString(2)) + "원";
+                                }
+
+                                staticsList.add(strListData);
                             }
                         }
                     }
@@ -125,6 +148,13 @@ public class StatisticsActivity extends AppCompatActivity{
                 } catch(SQLiteException ex){
                     Toast.makeText(getApplicationContext(), "Database unavailable btnSearch.setOnClickListener()", Toast.LENGTH_SHORT).show();
                 }
+
+
+                RecyclerView recyclerView = findViewById(R.id.statRecyclerView);
+                recyclerView.setLayoutManager(new LinearLayoutManager(StatisticsActivity.this));
+
+                StatRecyclerAdapter adapter = new StatRecyclerAdapter(staticsList);
+                recyclerView.setAdapter(adapter);
 
             }
         });
@@ -148,4 +178,26 @@ public class StatisticsActivity extends AppCompatActivity{
             txtSrhEndDate.setText(strEndDate);
         }
     };
+
+    // 기준년월 선택 체크
+    protected void searchRadioButtonClickChk(){
+
+        // 조회 시작일
+        String strPreDate;
+
+        // 현재 년월일 yyyy-MM-dd
+        String currentDate = StringUtil.getCurYear() + "-" + StringUtil.getCurMonth() + "-" + StringUtil.getCurDay();
+
+        if(radioSrhYear.isChecked()){
+            strPreDate = (Integer.valueOf(StringUtil.getCurYear()) - 3) + "-01-01";
+            strRadioSrhChoose = "YEAR";
+            txtSrhStartDate.setText(strPreDate);
+            txtSrhEndDate.setText(currentDate);
+        } else if(radioSrhMonth.isChecked()){
+            strPreDate = (Integer.valueOf(StringUtil.getCurYear()) - 1) + "-01-01";
+            strRadioSrhChoose = "MONTH";
+            txtSrhStartDate.setText(strPreDate);
+            txtSrhEndDate.setText(currentDate);
+        }
+    }
 }

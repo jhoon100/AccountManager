@@ -69,7 +69,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="50sp"
                 android:layout_height="match_parent"
                 android:text="@string/month"
                 android:id="@+id/monthTitle"
@@ -92,11 +92,12 @@
 
             <TextView
                 android:id="@+id/txtSumTimes"
+                android:layout_width="160sp"
                 android:layout_column="2"
                 android:layout_row="0"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:ems="7"
+                android:layout_gravity="fill_horizontal"
                 android:gravity="end"/>
 
             <TextView
@@ -125,10 +126,10 @@
                 android:id="@+id/txtSumAmount"
                 android:layout_row="1"
                 android:layout_column="2"
-                android:ems="7"
-                android:gravity="end"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:layout_gravity="fill_horizontal"
+                android:gravity="end"/>
 
             <TextView
                 android:layout_width="wrap_content"
