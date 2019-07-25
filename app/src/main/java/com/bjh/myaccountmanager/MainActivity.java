@@ -63,6 +63,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if(savedInstanceState != null){
+            strBaseTimeSection = savedInstanceState.getString("strBaseTimeSection");
+            strBaseTime = savedInstanceState.getString("strBaseTime");
+            intBaseAmt = savedInstanceState.getInt("intBaseAmt");
+        }
+
         calendarView = (CalendarView) findViewById(R.id.calendarView);  // CalendarView
 
         btnSave = (Button) findViewById(R.id.btnSave);                  // 저장 버튼
@@ -337,6 +343,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent statisticsIntent = new Intent(getApplicationContext(), StatisticsActivity.class);
+                statisticsIntent.putExtra("strBaseTimeSection", strBaseTimeSection);
+                statisticsIntent.putExtra("strBaseTime", strBaseTime);
+                statisticsIntent.putExtra("intBaseAmt", intBaseAmt);
                 startActivity(statisticsIntent);
             }
         });
@@ -351,6 +360,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("strBaseTimeSection", strBaseTimeSection);
+        savedInstanceState.putString("strBaseTime", strBaseTime);
+        savedInstanceState.putInt("intBaseAmt", intBaseAmt);
     }
 
     /**

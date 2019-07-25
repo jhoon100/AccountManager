@@ -1,6 +1,7 @@
 package com.bjh.myaccountmanager;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -22,6 +23,7 @@ import com.bjh.myaccountmanager.db.DatabaseHelper;
 import com.bjh.myaccountmanager.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StatisticsActivity extends AppCompatActivity{
 
@@ -38,10 +40,20 @@ public class StatisticsActivity extends AppCompatActivity{
 
     Button btnSearch;               // 조회 버튼
 
+    private String strBaseTimeSection;  // 시 / 분 구분
+    private String strBaseTime;         // 기본 근무 시간
+    private int intBaseAmt;             // 기본 근무 금액
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
+
+        Intent intent = getIntent();
+
+        strBaseTimeSection = intent.getStringExtra("strBaseTimeSection");
+        strBaseTime = intent.getStringExtra("strBaseTime");
+        intBaseAmt = intent.getIntExtra("intBaseAmt", 0);
 
         txtSrhStartDate = (TextView) findViewById(R.id.txtSrhStartDate);
         txtSrhEndDate = (TextView) findViewById(R.id.txtSrhEndDate);
@@ -116,7 +128,7 @@ public class StatisticsActivity extends AppCompatActivity{
 
                 String strQuery = "SELECT "+ strShowColQuery + " FROM " + DatabaseColumns._TABLENAME1 + " WHERE " + DatabaseColumns.WORK_DAY+" >= ? and "+DatabaseColumns.WORK_DAY+" <= ? " + strGroupByQuery;
 
-                ArrayList<String> staticsList = new ArrayList<>();
+                ArrayList<HashMap<String, String>> staticsList = new ArrayList<>();
 
                 try{
                     db = databaseHelper.getReadableDatabase();
@@ -127,18 +139,26 @@ public class StatisticsActivity extends AppCompatActivity{
                         for(int i=0; i<cursor.getCount(); i++){
                             if(cursor.moveToNext()){
 
-                                String strListData;
+                                HashMap<String, String> mapListData = new HashMap<>();
 
                                 if(strRadioSrhChoose.equals("YEAR")){
-                                    strListData = cursor.getInt(0) + "년    " + cursor.getInt(1) + "시간    " + StringUtil.convertNumberToComma(cursor.getString(2)) + "원";
+                                    mapListData.put("staticsDate", cursor.getInt(0) + "년");
                                 } else {
-
-                                    String tmpDate = cursor.getString(0);
-
-                                    strListData = tmpDate.substring(0, 4) + "년 " + tmpDate.substring(4, 6) + "월    " + cursor.getInt(1) + "시간    " + StringUtil.convertNumberToComma(cursor.getString(2)) + "원";
+                                    mapListData.put("staticsDate", cursor.getString(0).substring(0, 4) + "년 " + cursor.getString(0).substring(4, 6) + "월");
                                 }
 
-                                staticsList.add(strListData);
+                                String strTimeSectNm;
+
+                                if(strBaseTimeSection.equals("HOUR")){
+                                    strTimeSectNm = "시간";
+                                } else {
+                                    strTimeSectNm = "분";
+                                }
+
+                                mapListData.put("staticsTime", cursor.getInt(1) + "" + strTimeSectNm);
+                                mapListData.put("staticsAmount", StringUtil.convertNumberToComma(cursor.getString(2)) + "원");
+
+                                staticsList.add(mapListData);
                             }
                         }
                     }

@@ -10,12 +10,13 @@ import com.bjh.myaccountmanager.R;
 import com.bjh.myaccountmanager.viewHolder.RecyclerViewHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StatRecyclerAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
-    private ArrayList<String> mData;
+    private ArrayList<HashMap<String, String>> mData;
 
-    public StatRecyclerAdapter(ArrayList<String> list){
+    public StatRecyclerAdapter(ArrayList<HashMap<String, String>> list){
         mData = list;
     }
 
@@ -34,8 +35,11 @@ public class StatRecyclerAdapter extends RecyclerView.Adapter<RecyclerViewHolder
 
     @Override
     public void onBindViewHolder(RecyclerViewHolder holder, int position){
-        String text = mData.get(position);
-        holder.staticsList.setText(text);
+        HashMap<String, String> hashMap = mData.get(position);
+
+        holder.staticsDate.setText(hashMap.get("staticsDate"));
+        holder.staticsTime.setText(hashMap.get("staticsTime"));
+        holder.staticsAmount.setText(hashMap.get("staticsAmount"));
     }
 
     @Override
