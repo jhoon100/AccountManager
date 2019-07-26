@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">MyAccountManager</string>
+    <string name="app_name">FP가계부</string>
 
-    <string name="titleName">급여 가계부</string>
+    <string name="titleName">Free Pay 가계부</string>
     <string name="titleTime">근무시간</string>
     <string name="titleAmount">근무금액</string>
 
