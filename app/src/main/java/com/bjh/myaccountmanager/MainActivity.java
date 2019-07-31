@@ -24,6 +24,8 @@ import com.bjh.myaccountmanager.db.DatabaseColumns;
 import com.bjh.myaccountmanager.db.DatabaseHelper;
 import com.bjh.myaccountmanager.util.StringUtil;
 
+import java.util.Calendar;
+
 public class MainActivity extends AppCompatActivity {
 
     SQLiteOpenHelper databaseHelper;
@@ -32,8 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private String CHOICE_DAY;              // 선택한 날짜
     private boolean MOD_CHK = false;        // 등록 / 수정 체크
     private boolean SET_MOD_CHK = false;    // 기본 세팅 등록 / 수정 체크
-
-    private int preMonth;           // 이전 선택 월
 
     private int chooseYear;         // 선택 년
     private int chooseMonth;        // 선택 월
@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private String strBaseTimeSection;  // 시 / 분 구분
     private String strBaseTime;         // 기본 근무 시간
     private int intBaseAmt;             // 기본 근무 금액
+    private String strBAseDayOfMonth;   // 월 기준일
 
     CalendarView calendarView;      // 달력
 
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView dailyTitle;            // 일자 선택 시 title
     private TextView monthTitle;            // 월별 근무시간 금액 title
 
+    private EditText txtDailyWork;          // 일 근무 명
     private EditText txtDailyTimes;         // 일 근무 시간
     private EditText txtDailyAmount;        // 일 근무 금액
 
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
             strBaseTimeSection = savedInstanceState.getString("strBaseTimeSection");
             strBaseTime = savedInstanceState.getString("strBaseTime");
             intBaseAmt = savedInstanceState.getInt("intBaseAmt");
+            strBAseDayOfMonth = savedInstanceState.getString("strBAseDayOfMonth");
         }
 
         calendarView = (CalendarView) findViewById(R.id.calendarView);  // CalendarView
@@ -78,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         dailyTitle = (TextView) findViewById(R.id.txtDaily);            // 일 상세 타이틀
         monthTitle = (TextView) findViewById(R.id.monthTitle);          // 월별 근무시간 금액 title
 
+        txtDailyWork = (EditText) findViewById(R.id.txtDailyWork);      // 일 근무 명
         txtDailyTimes = (EditText) findViewById(R.id.txtDailyTimes);    // 일 근무 시간
         txtDailyAmount = (EditText) findViewById(R.id.txtDailyAmount);  // 일 근무 금액
 
@@ -87,11 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(getApplicationContext());
 
-        // 월 근무 시간 및 근무 금액 조회
-        getTotalInfoToMonth(chooseYear, chooseMonth, chooseDayOfMonth);
-
         // 기본 세팅 시간 및 금액 불러오기
         getBaseSettingInfo();
+
+        // 월 근무 시간 및 근무 금액 조회
+        getTotalInfoToMonth(chooseYear, chooseMonth, chooseDayOfMonth);
 
         // 월, 일 시간 명 세팅 ( 시 or 분 )
         setTimeSectionName();
@@ -101,18 +105,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
 
+                if((strBaseTimeSection == null || strBaseTimeSection.equals("")) || (strBaseTime == null || strBaseTime.equals("")) || (intBaseAmt <= 0)){
+                    Toast.makeText(getApplicationContext(), R.string.settingMessage, Toast.LENGTH_SHORT).show();
+                }
+
                 chooseYear = year;              // 선택 년도
                 chooseMonth = (month+1);        // 선택 월
                 chooseDayOfMonth = dayOfMonth;  // 선택 일
 
-                if(preMonth != chooseMonth){
-                    getTotalInfoToMonth(year, (month+1), dayOfMonth);       // 월 근무 시간 및 근무 금액 조회
-                }
+                getTotalInfoToMonth(chooseYear, chooseMonth, chooseDayOfMonth);       // 월 근무 시간 및 근무 금액 조회
 
-                preMonth = chooseMonth;         // 이전 선택 월 값 세팅
-
-                String titleDate = year + "년 " + (month+1) + "월 " + dayOfMonth + "일";
-                String titleMonth = (month+1) + " 월 ";
+                String titleDate = chooseYear + "년 " + chooseMonth + "월 " + chooseDayOfMonth + "일";
+                String titleMonth = chooseMonth + " 월 ";
 
                 // 달력에 일자 선택 시 상세 정보에 일 세팅
                 dailyTitle.setText(titleDate);
@@ -120,12 +124,14 @@ public class MainActivity extends AppCompatActivity {
                 // 월별 근무시간 / 금액 타이틀 세팅
                 monthTitle.setText(titleMonth);
 
-                CHOICE_DAY = year+""+((month+1)<10?"0"+(month+1):(month+1))+""+(dayOfMonth<10?"0"+dayOfMonth:dayOfMonth);
+                CHOICE_DAY = chooseYear+""+(chooseMonth<10?"0"+chooseMonth:chooseMonth)+""+(chooseDayOfMonth<10?"0"+chooseDayOfMonth:chooseDayOfMonth);
 
                 try{
                     db = databaseHelper.getReadableDatabase();
-                    Cursor cursor = db.query(DatabaseColumns._TABLENAME1, new String[]{DatabaseColumns.WORK_TIME, DatabaseColumns.WORK_AMOUNT}, DatabaseColumns.WORK_DAY+" = ?", new String[]{CHOICE_DAY}, null, null, null);
+                    Cursor cursor = db.query(DatabaseColumns._TABLENAME1, new String[]{DatabaseColumns.WORK_NM, DatabaseColumns.WORK_TIME, DatabaseColumns.WORK_AMOUNT}, DatabaseColumns.WORK_DAY+" = ?", new String[]{CHOICE_DAY}, null, null, null);
 
+                    // 일 근무 명
+                    txtDailyWork = (EditText) findViewById(R.id.txtDailyWork);
                     // 일 근무 시간
                     txtDailyTimes = (EditText) findViewById(R.id.txtDailyTimes);
                     // 일 근무 금액
@@ -133,12 +139,14 @@ public class MainActivity extends AppCompatActivity {
 
                     if(cursor.getCount() > 0){
                         if(cursor.moveToFirst()){
-                            txtDailyTimes.setText(cursor.getString(0));
-                            txtDailyAmount.setText(StringUtil.convertNumberToComma(cursor.getString(1)));
+                            txtDailyWork.setText(cursor.getString(0));
+                            txtDailyTimes.setText(cursor.getString(1));
+                            txtDailyAmount.setText(StringUtil.convertNumberToComma(cursor.getString(2)));
                         }
 
                         MOD_CHK = true;
                     } else {
+                        txtDailyWork.setText("");
                         txtDailyTimes.setText("");
                         txtDailyAmount.setText("");
                         MOD_CHK = false;
@@ -166,6 +174,11 @@ public class MainActivity extends AppCompatActivity {
                     chk = false;
                 }
 
+                if(chk && (txtDailyWork.getText() == null || txtDailyWork.getText().toString().equals(""))){
+                    Toast.makeText(getApplicationContext(), R.string.msgDailyValidationNm, Toast.LENGTH_LONG).show();
+                    chk = false;
+                }
+
                 if(chk && (txtDailyTimes.getText() == null || txtDailyTimes.getText().toString().equals(""))){
                     Toast.makeText(getApplicationContext(), R.string.msgDailyValidationTime, Toast.LENGTH_LONG).show();
                     chk = false;
@@ -177,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // 포커스 클리어
+                txtDailyWork.clearFocus();
                 txtDailyTimes.clearFocus();
                 txtDailyAmount.clearFocus();
 
@@ -187,9 +201,9 @@ public class MainActivity extends AppCompatActivity {
                         long retVal;
 
                         if(MOD_CHK){   // 수정
-                            retVal = updateDailyColumn(db, CHOICE_DAY, txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
+                            retVal = updateDailyColumn(db, CHOICE_DAY, txtDailyWork.getText().toString(), txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
                         } else {        // 등록
-                            retVal = insertDailyColumn(db, CHOICE_DAY, txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
+                            retVal = insertDailyColumn(db, CHOICE_DAY, txtDailyWork.getText().toString(), txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
                         }
 
                         if(retVal == 0){
@@ -227,16 +241,20 @@ public class MainActivity extends AppCompatActivity {
                 EditText txtBaseTime = settingView.findViewById(R.id.txtBaseTime);
                 EditText txtBaseAmt = settingView.findViewById(R.id.txtBaseAmt);
 
-                if(strBaseTimeSection.equals("HOUR")){
+                // 월 기준일
+                EditText txtBaseDayOfMonth = settingView.findViewById(R.id.txtBaseDayOfMonth);
+
+                if(strBaseTimeSection != null && strBaseTimeSection.equals("HOUR")){
                     radioHour.setChecked(true);
                     radioMinute.setChecked(false);
-                } else if(strBaseTimeSection.equals("MINUTE")){
+                } else if(strBaseTimeSection != null && strBaseTimeSection.equals("MINUTE")){
                     radioHour.setChecked(false);
                     radioMinute.setChecked(true);
                 }
 
                 txtBaseTime.setText(strBaseTime);
                 txtBaseAmt.setText(StringUtil.convertNumberToComma(String.valueOf(intBaseAmt)));
+                txtBaseDayOfMonth.setText(strBAseDayOfMonth);
 
                 // dialog 세팅
                 AlertDialog dialog = new AlertDialog.Builder(v.getContext())
@@ -267,6 +285,7 @@ public class MainActivity extends AppCompatActivity {
                                 // 기준 시간 / 금액
                                 EditText txtBaseTime = settingView.findViewById(R.id.txtBaseTime);
                                 EditText txtBaseAmt = settingView.findViewById(R.id.txtBaseAmt);
+                                EditText txtBaseDayOfMonth = settingView.findViewById(R.id.txtBaseDayOfMonth);
 
                                 if(!radioHour.isChecked() && !radioMinute.isChecked()){        // 구분 선택 체크
                                     Toast.makeText(getApplicationContext(), R.string.msgValidationSection, Toast.LENGTH_LONG).show();
@@ -283,6 +302,10 @@ public class MainActivity extends AppCompatActivity {
                                     chk = false;
                                 }
 
+                                if(txtBaseDayOfMonth.getText() == null || txtBaseDayOfMonth.getText().toString().equals("")){
+                                    txtBaseDayOfMonth.setText("15");
+                                }
+
                                 if(radioHour.isChecked()){
                                     timeSection = "HOUR";
                                 } else {
@@ -296,9 +319,9 @@ public class MainActivity extends AppCompatActivity {
                                         long retVal;
 
                                         if(SET_MOD_CHK){   // 수정
-                                            retVal = updateBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")));
+                                            retVal = updateBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")), txtBaseDayOfMonth.getText().toString());
                                         } else {        // 등록
-                                            retVal = insertBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")));
+                                            retVal = insertBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")), txtBaseDayOfMonth.getText().toString());
                                         }
 
                                         if(retVal == 0){
@@ -346,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
                 statisticsIntent.putExtra("strBaseTimeSection", strBaseTimeSection);
                 statisticsIntent.putExtra("strBaseTime", strBaseTime);
                 statisticsIntent.putExtra("intBaseAmt", intBaseAmt);
+                statisticsIntent.putExtra("strBAseDayOfMonth", strBAseDayOfMonth);
                 startActivity(statisticsIntent);
             }
         });
@@ -368,6 +392,7 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putString("strBaseTimeSection", strBaseTimeSection);
         savedInstanceState.putString("strBaseTime", strBaseTime);
         savedInstanceState.putInt("intBaseAmt", intBaseAmt);
+        savedInstanceState.putString("strBAseDayOfMonth", strBAseDayOfMonth);
     }
 
     /**
@@ -378,40 +403,44 @@ public class MainActivity extends AppCompatActivity {
      * @param baseAmount
      * @return
      */
-    public long insertBaseColumn(SQLiteDatabase db, String timeSection, String baseTime, long baseAmount){
+    public long insertBaseColumn(SQLiteDatabase db, String timeSection, String baseTime, long baseAmount, String baseDayOfMonth){
         ContentValues values = new ContentValues();
         values.put(DatabaseColumns.TIME_SECTION, timeSection);
         values.put(DatabaseColumns.BASE_TIME, baseTime);
         values.put(DatabaseColumns.BASE_AMOUNT, baseAmount);
+        values.put(DatabaseColumns.BASE_DAY_OF_MONTH, baseDayOfMonth);
         return db.insert(DatabaseColumns._TABLENAME0, null, values);
     }
 
     /**
-     * BAse update
+     * Base update
      * @param db
      * @param timeSection
      * @param baseTime
      * @param baseAmount
      * @return
      */
-    public long updateBaseColumn(SQLiteDatabase db, String timeSection, String baseTime, long baseAmount){
+    public long updateBaseColumn(SQLiteDatabase db, String timeSection, String baseTime, long baseAmount, String baseDayOfMonth){
         ContentValues values = new ContentValues();
         values.put(DatabaseColumns.TIME_SECTION, timeSection);
         values.put(DatabaseColumns.BASE_TIME, baseTime);
         values.put(DatabaseColumns.BASE_AMOUNT, baseAmount);
+        values.put(DatabaseColumns.BASE_DAY_OF_MONTH, baseDayOfMonth);
         return db.update(DatabaseColumns._TABLENAME0, values, DatabaseColumns._ID+" = ?", new String[]{Integer.toString(1)});
     }
 
     /**
      * Daily insert
      * @param db
+     * @param workNm
      * @param workDay
      * @param workTime
      * @param workAmount
      * @return
      */
-    public long insertDailyColumn(SQLiteDatabase db, String workDay, String workTime, long workAmount){
+    public long insertDailyColumn(SQLiteDatabase db, String workDay, String workNm, String workTime, long workAmount){
         ContentValues values = new ContentValues();
+        values.put(DatabaseColumns.WORK_NM, workNm);
         values.put(DatabaseColumns.WORK_DAY, workDay);
         values.put(DatabaseColumns.WORK_TIME, workTime);
         values.put(DatabaseColumns.WORK_AMOUNT, workAmount);
@@ -421,13 +450,15 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Daily update
      * @param db
+     * @param workNm
      * @param workDay
      * @param workTime
      * @param workAmount
      * @return
      */
-    public long updateDailyColumn(SQLiteDatabase db, String workDay, String workTime, long workAmount){
+    public long updateDailyColumn(SQLiteDatabase db, String workDay, String workNm, String workTime, long workAmount){
         ContentValues values = new ContentValues();
+        values.put(DatabaseColumns.WORK_NM, workNm);
         values.put(DatabaseColumns.WORK_TIME, workTime);
         values.put(DatabaseColumns.WORK_AMOUNT, workAmount);
         return db.update(DatabaseColumns._TABLENAME1, values, DatabaseColumns.WORK_DAY+" = ?", new String[]{workDay});
@@ -446,8 +477,8 @@ public class MainActivity extends AppCompatActivity {
         // 월별 근무시간 / 금액 타이틀 세팅
         monthTitle.setText(strMonthTitle);
 
-        String startDate = String.valueOf(chooseYear) + (chooseMonth<10?"0"+chooseMonth:chooseMonth) + "01";
-        String endDate = String.valueOf(chooseYear) + (chooseMonth<10?"0"+chooseMonth:chooseMonth) + "31";
+        String startDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBAseDayOfMonth), -15, Calendar.DAY_OF_YEAR);
+        String endDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBAseDayOfMonth), 15, Calendar.DAY_OF_YEAR);
 
         TextView txtSumTimes = (TextView) findViewById(R.id.txtSumTimes);
         TextView txtSumAmount = (TextView) findViewById(R.id.txtSumAmount);
@@ -465,7 +496,6 @@ public class MainActivity extends AppCompatActivity {
                     if(cursor.moveToNext()){
                         intSumTime += cursor.getInt(0);
                         intSumAmt += cursor.getInt(1);
-
                     }
                 }
 
@@ -493,19 +523,21 @@ public class MainActivity extends AppCompatActivity {
         try{
 
             db = databaseHelper.getReadableDatabase();
-            Cursor cursor = db.query(DatabaseColumns._TABLENAME0, new String[]{DatabaseColumns.TIME_SECTION, DatabaseColumns.BASE_TIME, DatabaseColumns.BASE_AMOUNT}, null, null, null, null, null);
+            Cursor cursor = db.query(DatabaseColumns._TABLENAME0, new String[]{DatabaseColumns.TIME_SECTION, DatabaseColumns.BASE_TIME, DatabaseColumns.BASE_AMOUNT, DatabaseColumns.BASE_DAY_OF_MONTH}, null, null, null, null, null);
 
             if(cursor.getCount() > 0){
                 if(cursor.moveToFirst()){
                     strBaseTimeSection = cursor.getString(0);
                     strBaseTime = cursor.getString(1);
                     intBaseAmt = cursor.getInt(2);
+                    strBAseDayOfMonth = cursor.getString(3);
                 }
                 SET_MOD_CHK = true;
             } else {
                 strBaseTimeSection = "MINUTE";
                 strBaseTime = "0";
                 intBaseAmt = 0;
+                strBAseDayOfMonth = "15";
                 SET_MOD_CHK = false;
             }
 
@@ -524,10 +556,10 @@ public class MainActivity extends AppCompatActivity {
         TextView timeComment1 = (TextView) findViewById(R.id.timeComment1);     // 월 시간 명
         TextView timeComment2 = (TextView) findViewById(R.id.timeComment2);     // 일 시간 명
 
-        if(strBaseTimeSection.equals("HOUR")){
+        if(strBaseTimeSection != null && strBaseTimeSection.equals("HOUR")){
             timeComment1.setText("시");
             timeComment2.setText("시");
-        } else if(strBaseTimeSection.equals("MINUTE")){
+        } else if(strBaseTimeSection != null && strBaseTimeSection.equals("MINUTE")){
             timeComment1.setText("분");
             timeComment2.setText("분");
         } else {

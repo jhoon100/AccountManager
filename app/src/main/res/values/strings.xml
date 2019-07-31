@@ -2,6 +2,7 @@
     <string name="app_name">FP가계부</string>
 
     <string name="titleName">Free Pay 가계부</string>
+    <string name="titleWork">근무 명</string>
     <string name="titleTime">근무시간</string>
     <string name="titleAmount">근무금액</string>
 
@@ -10,6 +11,7 @@
     <string name="baseTimeSelect">기준 시/분</string>
     <string name="baseTime">기준 시간</string>
     <string name="baseAmount">기준 금액</string>
+    <string name="baseDayOfMonth">월 기준일</string>
 
     <string name="dailyTitle">일</string>
 
@@ -31,6 +33,7 @@
     <string name="msgValidationTime">기준 시간을 입력하세요.</string>
     <string name="msgValidationAmount">기준 금액을 입력하세요.</string>
 
+    <string name="msgDailyValidationNm">근무 명을 입력하세요.</string>
     <string name="msgDailyValidationTime">근무 시간을 입력하세요.</string>
     <string name="msgDailyValidationAmount">근무 금액을 입력하세요.</string>
 

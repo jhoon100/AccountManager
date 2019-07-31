@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GridLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:columnCount="2"
-    android:rowCount="3"
+    android:rowCount="4"
     android:padding="10dp"
     android:focusable="true"
     android:focusableInTouchMode="true"
@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_column="1"
         android:layout_row="0"
+        android:layout_gravity="start"
         android:orientation="horizontal">
 
         <RadioButton
@@ -73,5 +74,24 @@
         android:ems="10"
         android:inputType="number"
         android:gravity="end" />
+
+    <TextView
+        android:text="@string/baseDayOfMonth"
+        android:layout_column="0"
+        android:layout_row="3"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"/>
+
+    <EditText
+        android:id="@+id/txtBaseDayOfMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_row="3"
+        android:ems="2"
+        android:inputType="number"
+        android:layout_gravity="start"
+        android:gravity="center" />
 
 </GridLayout>

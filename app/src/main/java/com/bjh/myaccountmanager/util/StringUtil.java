@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 public class StringUtil {
@@ -64,5 +65,26 @@ public class StringUtil {
     public static String getCurDay(){
         SimpleDateFormat format = new SimpleDateFormat("dd", Locale.getDefault());
         return format.format(Calendar.getInstance().getTime());
+    }
+
+    /**
+     * 날짜 계산 후 yyyyMMdd 형식으로 리턴
+     * argAmount 값이 + 일 경우 날짜 더하기 - 일 경우 날짜 빼기
+     * @param argYear
+     * @param argMonth
+     * @param argDay
+     * @param argAmount
+     * @param argCalSection
+     * @return
+     */
+    public static String getCalculatorDay(int argYear, int argMonth, int argDay, int argAmount, int argCalSection){
+
+        Calendar cal = new GregorianCalendar(argYear, argMonth, argDay);
+
+        cal.add(argCalSection, argAmount);
+
+        SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+
+        return sf.format(cal.getTime());
     }
 }
