@@ -557,11 +557,11 @@ public class MainActivity extends AppCompatActivity {
         TextView timeComment2 = (TextView) findViewById(R.id.timeComment2);     // 일 시간 명
 
         if(strBaseTimeSection != null && strBaseTimeSection.equals("HOUR")){
-            timeComment1.setText("시");
-            timeComment2.setText("시");
+            timeComment1.setText(R.string.labelHour);   // 시
+            timeComment2.setText(R.string.labelHour);   // 시
         } else if(strBaseTimeSection != null && strBaseTimeSection.equals("MINUTE")){
-            timeComment1.setText("분");
-            timeComment2.setText("분");
+            timeComment1.setText(R.string.labelMinute); // 분
+            timeComment2.setText(R.string.labelMinute); // 분
         } else {
             timeComment1.setText("");
             timeComment2.setText("");
