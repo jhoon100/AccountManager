@@ -1,7 +1,6 @@
 package com.bjh.myaccountmanager;
 
 import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,6 +19,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bjh.myaccountmanager.db.DatabaseAction;
 import com.bjh.myaccountmanager.db.DatabaseColumns;
 import com.bjh.myaccountmanager.db.DatabaseHelper;
 import com.bjh.myaccountmanager.util.StringUtil;
@@ -59,6 +59,17 @@ public class MainActivity extends AppCompatActivity {
     private EditText txtDailyWork;          // 일 근무 명
     private EditText txtDailyTimes;         // 일 근무 시간
     private EditText txtDailyAmount;        // 일 근무 금액
+
+    DatabaseAction dbAction;                // DB CRUD
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("strBaseTimeSection", strBaseTimeSection);
+        savedInstanceState.putString("strBaseTime", strBaseTime);
+        savedInstanceState.putInt("intBaseAmt", intBaseAmt);
+        savedInstanceState.putString("strBAseDayOfMonth", strBAseDayOfMonth);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,12 +209,14 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         db = databaseHelper.getReadableDatabase();
 
+                        dbAction = new DatabaseAction();
+
                         long retVal;
 
                         if(MOD_CHK){   // 수정
-                            retVal = updateDailyColumn(db, CHOICE_DAY, txtDailyWork.getText().toString(), txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
+                            retVal = dbAction.updateDailyColumn(db, CHOICE_DAY, txtDailyWork.getText().toString(), txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
                         } else {        // 등록
-                            retVal = insertDailyColumn(db, CHOICE_DAY, txtDailyWork.getText().toString(), txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
+                            retVal = dbAction.insertDailyColumn(db, CHOICE_DAY, txtDailyWork.getText().toString(), txtDailyTimes.getText().toString(), Integer.parseInt(txtDailyAmount.getText().toString().replaceAll(",", "")));
                         }
 
                         if(retVal == 0){
@@ -316,12 +329,14 @@ public class MainActivity extends AppCompatActivity {
                                     try{
                                         db = databaseHelper.getReadableDatabase();
 
+                                        dbAction = new DatabaseAction();
+
                                         long retVal;
 
                                         if(SET_MOD_CHK){   // 수정
-                                            retVal = updateBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")), txtBaseDayOfMonth.getText().toString());
+                                            retVal = dbAction.updateBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")), txtBaseDayOfMonth.getText().toString());
                                         } else {        // 등록
-                                            retVal = insertBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")), txtBaseDayOfMonth.getText().toString());
+                                            retVal = dbAction.insertBaseColumn(db, timeSection, txtBaseTime.getText().toString(), Integer.valueOf(txtBaseAmt.getText().toString().replaceAll(",", "")), txtBaseDayOfMonth.getText().toString());
                                         }
 
                                         if(retVal == 0){
@@ -354,6 +369,18 @@ public class MainActivity extends AppCompatActivity {
                                 dialog.dismiss();
                             }
                         });
+
+                        EditText txtBaseDayOfMonth = settingView.findViewById(R.id.txtBaseDayOfMonth);
+
+                        txtBaseDayOfMonth.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                            @Override
+                            public void onFocusChange(View v, boolean hasFocus) {
+                                if(!hasFocus){
+                                    Toast.makeText(getApplicationContext(), ((TextView)v).getText(), Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        });
                     }
                 });
 
@@ -384,84 +411,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState){
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putString("strBaseTimeSection", strBaseTimeSection);
-        savedInstanceState.putString("strBaseTime", strBaseTime);
-        savedInstanceState.putInt("intBaseAmt", intBaseAmt);
-        savedInstanceState.putString("strBAseDayOfMonth", strBAseDayOfMonth);
-    }
-
-    /**
-     * Base insert
-     * @param db
-     * @param timeSection
-     * @param baseTime
-     * @param baseAmount
-     * @return
-     */
-    public long insertBaseColumn(SQLiteDatabase db, String timeSection, String baseTime, long baseAmount, String baseDayOfMonth){
-        ContentValues values = new ContentValues();
-        values.put(DatabaseColumns.TIME_SECTION, timeSection);
-        values.put(DatabaseColumns.BASE_TIME, baseTime);
-        values.put(DatabaseColumns.BASE_AMOUNT, baseAmount);
-        values.put(DatabaseColumns.BASE_DAY_OF_MONTH, baseDayOfMonth);
-        return db.insert(DatabaseColumns._TABLENAME0, null, values);
-    }
-
-    /**
-     * Base update
-     * @param db
-     * @param timeSection
-     * @param baseTime
-     * @param baseAmount
-     * @return
-     */
-    public long updateBaseColumn(SQLiteDatabase db, String timeSection, String baseTime, long baseAmount, String baseDayOfMonth){
-        ContentValues values = new ContentValues();
-        values.put(DatabaseColumns.TIME_SECTION, timeSection);
-        values.put(DatabaseColumns.BASE_TIME, baseTime);
-        values.put(DatabaseColumns.BASE_AMOUNT, baseAmount);
-        values.put(DatabaseColumns.BASE_DAY_OF_MONTH, baseDayOfMonth);
-        return db.update(DatabaseColumns._TABLENAME0, values, DatabaseColumns._ID+" = ?", new String[]{Integer.toString(1)});
-    }
-
-    /**
-     * Daily insert
-     * @param db
-     * @param workNm
-     * @param workDay
-     * @param workTime
-     * @param workAmount
-     * @return
-     */
-    public long insertDailyColumn(SQLiteDatabase db, String workDay, String workNm, String workTime, long workAmount){
-        ContentValues values = new ContentValues();
-        values.put(DatabaseColumns.WORK_NM, workNm);
-        values.put(DatabaseColumns.WORK_DAY, workDay);
-        values.put(DatabaseColumns.WORK_TIME, workTime);
-        values.put(DatabaseColumns.WORK_AMOUNT, workAmount);
-        return db.insert(DatabaseColumns._TABLENAME1, null, values);
-    }
-
-    /**
-     * Daily update
-     * @param db
-     * @param workNm
-     * @param workDay
-     * @param workTime
-     * @param workAmount
-     * @return
-     */
-    public long updateDailyColumn(SQLiteDatabase db, String workDay, String workNm, String workTime, long workAmount){
-        ContentValues values = new ContentValues();
-        values.put(DatabaseColumns.WORK_NM, workNm);
-        values.put(DatabaseColumns.WORK_TIME, workTime);
-        values.put(DatabaseColumns.WORK_AMOUNT, workAmount);
-        return db.update(DatabaseColumns._TABLENAME1, values, DatabaseColumns.WORK_DAY+" = ?", new String[]{workDay});
     }
 
     /**
