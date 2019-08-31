@@ -2,6 +2,7 @@ package com.bjh.myaccountmanager;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -44,6 +45,8 @@ public class StatisticsActivity extends AppCompatActivity{
     private String strBaseTime;         // 기본 근무 시간
     private int intBaseAmt;             // 기본 근무 금액
 
+    private Resources res;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -68,6 +71,8 @@ public class StatisticsActivity extends AppCompatActivity{
         // 날짜 입력항목 선택시 키보드 안올라오게 세팅
         txtSrhStartDate.setInputType(0);
         txtSrhEndDate.setInputType(0);
+
+        res = getResources();
 
         // 기준년월 default 세팅
         searchRadioButtonClickChk();
@@ -142,21 +147,21 @@ public class StatisticsActivity extends AppCompatActivity{
                                 HashMap<String, String> mapListData = new HashMap<>();
 
                                 if(strRadioSrhChoose.equals("YEAR")){
-                                    mapListData.put("staticsDate", cursor.getInt(0) + "년");
+                                    mapListData.put("staticsDate", cursor.getInt(0) + res.getString(R.string.year));
                                 } else {
-                                    mapListData.put("staticsDate", cursor.getString(0).substring(0, 4) + "년 " + cursor.getString(0).substring(4, 6) + "월");
+                                    mapListData.put("staticsDate", cursor.getString(0).substring(0, 4) + res.getString(R.string.year) + " " + cursor.getString(0).substring(4, 6) + res.getString(R.string.month));
                                 }
 
                                 String strTimeSectNm;
 
                                 if(strBaseTimeSection.equals("HOUR")){
-                                    strTimeSectNm = "시간";
+                                    strTimeSectNm = res.getString(R.string.labelTime);
                                 } else {
-                                    strTimeSectNm = "분";
+                                    strTimeSectNm = res.getString(R.string.labelMinute);
                                 }
 
                                 mapListData.put("staticsTime", cursor.getInt(1) + "" + strTimeSectNm);
-                                mapListData.put("staticsAmount", StringUtil.convertNumberToComma(cursor.getString(2)) + "원");
+                                mapListData.put("staticsAmount", StringUtil.convertNumberToComma(cursor.getString(2)) + res.getString(R.string.labelWon));
 
                                 staticsList.add(mapListData);
                             }

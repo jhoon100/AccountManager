@@ -3,6 +3,7 @@ package com.bjh.myaccountmanager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private String strBaseTimeSection;  // 시 / 분 구분
     private String strBaseTime;         // 기본 근무 시간
     private int intBaseAmt;             // 기본 근무 금액
-    private String strBAseDayOfMonth;   // 월 기준일
+    private String strBaseDayOfMonth;   // 월 기준일
 
     CalendarView calendarView;      // 달력
 
@@ -62,13 +63,15 @@ public class MainActivity extends AppCompatActivity {
 
     DatabaseAction dbAction;                // DB CRUD
 
+    private Resources res;
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putString("strBaseTimeSection", strBaseTimeSection);
         savedInstanceState.putString("strBaseTime", strBaseTime);
         savedInstanceState.putInt("intBaseAmt", intBaseAmt);
-        savedInstanceState.putString("strBAseDayOfMonth", strBAseDayOfMonth);
+        savedInstanceState.putString("strBaseDayOfMonth", strBaseDayOfMonth);
     }
 
     @Override
@@ -80,8 +83,10 @@ public class MainActivity extends AppCompatActivity {
             strBaseTimeSection = savedInstanceState.getString("strBaseTimeSection");
             strBaseTime = savedInstanceState.getString("strBaseTime");
             intBaseAmt = savedInstanceState.getInt("intBaseAmt");
-            strBAseDayOfMonth = savedInstanceState.getString("strBAseDayOfMonth");
+            strBaseDayOfMonth = savedInstanceState.getString("strBaseDayOfMonth");
         }
+
+        res = getResources();
 
         calendarView = (CalendarView) findViewById(R.id.calendarView);  // CalendarView
 
@@ -126,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
 
                 getTotalInfoToMonth(chooseYear, chooseMonth, chooseDayOfMonth);       // 월 근무 시간 및 근무 금액 조회
 
-                String titleDate = chooseYear + "년 " + chooseMonth + "월 " + chooseDayOfMonth + "일";
-                String titleMonth = chooseMonth + " 월 ";
+                String titleDate = chooseYear + res.getString(R.string.year) +" " + chooseMonth + res.getString(R.string.month) + " " + chooseDayOfMonth + res.getString(R.string.day);
+                String titleMonth = chooseMonth + " " + res.getString(R.string.month) + " ";
 
                 // 달력에 일자 선택 시 상세 정보에 일 세팅
                 dailyTitle.setText(titleDate);
@@ -267,7 +272,8 @@ public class MainActivity extends AppCompatActivity {
 
                 txtBaseTime.setText(strBaseTime);
                 txtBaseAmt.setText(StringUtil.convertNumberToComma(String.valueOf(intBaseAmt)));
-                txtBaseDayOfMonth.setText(strBAseDayOfMonth);
+                txtBaseDayOfMonth.setText(strBaseDayOfMonth);
+                setBaseDayOfMonthInfo(Integer.valueOf(strBaseDayOfMonth));
 
                 // dialog 세팅
                 AlertDialog dialog = new AlertDialog.Builder(v.getContext())
@@ -315,8 +321,17 @@ public class MainActivity extends AppCompatActivity {
                                     chk = false;
                                 }
 
-                                if(txtBaseDayOfMonth.getText() == null || txtBaseDayOfMonth.getText().toString().equals("")){
-                                    txtBaseDayOfMonth.setText("15");
+                                if(txtBaseDayOfMonth.getText() == null || txtBaseDayOfMonth.getText().toString().equals("")){   // 기준일 default 세팅
+                                    txtBaseDayOfMonth.setText(String.valueOf(R.integer.baseDayOfMonthValue));
+                                    setBaseDayOfMonthInfo(R.integer.baseDayOfMonthValue);
+                                }
+
+                                // 월 기준일 비교를 위한 cast
+                                int strBaseDayOfMonthVal = Integer.valueOf(String.valueOf(txtBaseDayOfMonth.getText()));
+
+                                if(chk && (strBaseDayOfMonthVal < 1 || strBaseDayOfMonthVal > 31)){
+                                    Toast.makeText(getApplicationContext(), R.string.msgBaseDayOfMonth, Toast.LENGTH_LONG).show();
+                                    chk = false;
                                 }
 
                                 if(radioHour.isChecked()){
@@ -372,11 +387,24 @@ public class MainActivity extends AppCompatActivity {
 
                         EditText txtBaseDayOfMonth = settingView.findViewById(R.id.txtBaseDayOfMonth);
 
+                        // 월 기준일 포커스 변경 시 설명 자동 세팅 및 입력 값 유효성 체크
                         txtBaseDayOfMonth.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                             @Override
                             public void onFocusChange(View v, boolean hasFocus) {
                                 if(!hasFocus){
-                                    Toast.makeText(getApplicationContext(), ((TextView)v).getText(), Toast.LENGTH_SHORT).show();
+                                    int intVal = Integer.valueOf(String.valueOf(((TextView)v).getText()));
+                                    if(intVal < 1 || intVal > 31){
+                                        Toast.makeText(getApplicationContext(), R.string.msgBaseDayOfMonth, Toast.LENGTH_SHORT).show();
+
+                                        EditText txtBaseTime = settingView.findViewById(R.id.txtBaseTime);  // 기준 시간
+                                        EditText txtBaseAmt = settingView.findViewById(R.id.txtBaseAmt);    // 기준 금액
+
+                                        ((EditText)v).requestFocus();   // 기준일 포커스 세팅
+                                        txtBaseTime.setFocusable(false);    // 기준 시간 포커스 제거
+                                        txtBaseAmt.setFocusable(false);     // 기준 금액 포커스 제거
+                                    }
+                                    // ex 안내 세팅
+                                    setBaseDayOfMonthInfo(intVal);
                                 }
 
                             }
@@ -396,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
                 statisticsIntent.putExtra("strBaseTimeSection", strBaseTimeSection);
                 statisticsIntent.putExtra("strBaseTime", strBaseTime);
                 statisticsIntent.putExtra("intBaseAmt", intBaseAmt);
-                statisticsIntent.putExtra("strBAseDayOfMonth", strBAseDayOfMonth);
+                statisticsIntent.putExtra("strBaseDayOfMonth", strBaseDayOfMonth);
                 startActivity(statisticsIntent);
             }
         });
@@ -413,6 +441,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void setBaseDayOfMonthInfo(int argBaseDay){
+        TextView baseDayOfMonthInfo = settingView.findViewById(R.id.baseDayOfMonthInfo);
+
+        String strtDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, argBaseDay, -15, Calendar.DAY_OF_YEAR);
+        String endDate =  StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, argBaseDay, 15, Calendar.DAY_OF_YEAR);
+        String strBaseDate = " ex) "+ strtDate.substring(4, 6) + res.getString(R.string.month) + strtDate.substring(6, 8) + res.getString(R.string.day) + " ~ " + endDate.substring(4, 6) + res.getString(R.string.month) + endDate.substring(6, 8) + res.getString(R.string.day);
+        baseDayOfMonthInfo.setText(strBaseDate);
+    }
+
     /**
      * 상단 월 전체 근무 시간 및 금액 출력 처리
      * @param chooseYear
@@ -421,13 +458,13 @@ public class MainActivity extends AppCompatActivity {
      */
     public void getTotalInfoToMonth(int chooseYear, int chooseMonth, int chooseDayOfMonth){
 
-        String strMonthTitle = chooseMonth + " 월 ";
+        String strMonthTitle = chooseMonth + " " + res.getString(R.string.month) + " ";
 
         // 월별 근무시간 / 금액 타이틀 세팅
         monthTitle.setText(strMonthTitle);
 
-        String startDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBAseDayOfMonth), -15, Calendar.DAY_OF_YEAR);
-        String endDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBAseDayOfMonth), 15, Calendar.DAY_OF_YEAR);
+        String startDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBaseDayOfMonth), -15, Calendar.DAY_OF_YEAR);
+        String endDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBaseDayOfMonth), 15, Calendar.DAY_OF_YEAR);
 
         TextView txtSumTimes = (TextView) findViewById(R.id.txtSumTimes);
         TextView txtSumAmount = (TextView) findViewById(R.id.txtSumAmount);
@@ -479,14 +516,14 @@ public class MainActivity extends AppCompatActivity {
                     strBaseTimeSection = cursor.getString(0);
                     strBaseTime = cursor.getString(1);
                     intBaseAmt = cursor.getInt(2);
-                    strBAseDayOfMonth = cursor.getString(3);
+                    strBaseDayOfMonth = cursor.getString(3);
                 }
                 SET_MOD_CHK = true;
             } else {
                 strBaseTimeSection = "MINUTE";
                 strBaseTime = "0";
                 intBaseAmt = 0;
-                strBAseDayOfMonth = "15";
+                strBaseDayOfMonth = String.valueOf(R.integer.baseDayOfMonthValue);
                 SET_MOD_CHK = false;
             }
 
