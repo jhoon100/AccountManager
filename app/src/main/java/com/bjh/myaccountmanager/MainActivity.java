@@ -441,6 +441,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // 기본일 선택 시 날짜 예시 출력
     public void setBaseDayOfMonthInfo(int argBaseDay){
         TextView baseDayOfMonthInfo = settingView.findViewById(R.id.baseDayOfMonthInfo);
 
