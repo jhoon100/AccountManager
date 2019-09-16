@@ -34,15 +34,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 버전 2일 경우 daily_info 테이블 근무명 컬럼 추가
         if(oldVersion < 2){
 
-            db.execSQL("ALTER TABLE "+DatabaseColumns._TABLENAME1+" ADD COLUMN "+DatabaseColumns.WORK_NM+" TEXT NOT NULL");
-            db.execSQL("ALTER TABLE "+DatabaseColumns._TABLENAME0+" ADD COLUMN "+DatabaseColumns.BASE_DAY_OF_MONTH+" TEXT NOT NULL");
-            /*
+            //db.execSQL("ALTER TABLE "+DatabaseColumns._TABLENAME1+" ADD COLUMN "+DatabaseColumns.WORK_NM+" TEXT NOT NULL");
+            //db.execSQL("ALTER TABLE "+DatabaseColumns._TABLENAME0+" ADD COLUMN "+DatabaseColumns.BASE_DAY_OF_MONTH+" TEXT NOT NULL");
             db.execSQL("DROP TABLE IF EXISTS "+DatabaseColumns._TABLENAME0);
             db.execSQL("DROP TABLE IF EXISTS "+DatabaseColumns._TABLENAME1);
 
             db.execSQL(DatabaseColumns._CREATE0);
             db.execSQL(DatabaseColumns._CREATE1);
-            */
+
         }
     }
 }
