@@ -270,10 +270,10 @@ public class MainActivity extends AppCompatActivity {
                     radioMinute.setChecked(true);
                 }
 
-                txtBaseTime.setText(strBaseTime);
-                txtBaseAmt.setText(StringUtil.convertNumberToComma(String.valueOf(intBaseAmt)));
-                txtBaseDayOfMonth.setText(strBaseDayOfMonth);
-                setBaseDayOfMonthInfo(Integer.valueOf(strBaseDayOfMonth));
+                txtBaseTime.setText(strBaseTime);   // 기준 시간 값 세팅
+                txtBaseAmt.setText(StringUtil.convertNumberToComma(String.valueOf(intBaseAmt)));    // 기준 금액 값 세팅
+                txtBaseDayOfMonth.setText(strBaseDayOfMonth);   // 기준일 값 세팅
+                setBaseDayOfMonthInfo(Integer.valueOf(strBaseDayOfMonth));  // 기준일 예시 세팅
 
                 // dialog 세팅
                 AlertDialog dialog = new AlertDialog.Builder(v.getContext())
@@ -319,11 +319,6 @@ public class MainActivity extends AppCompatActivity {
                                 if(chk && (txtBaseAmt.getText() == null || txtBaseAmt.getText().toString().equals(""))){           // 금액 선택 체크
                                     Toast.makeText(getApplicationContext(), R.string.msgValidationAmount, Toast.LENGTH_LONG).show();
                                     chk = false;
-                                }
-
-                                if(txtBaseDayOfMonth.getText() == null || txtBaseDayOfMonth.getText().toString().equals("")){   // 기준일 default 세팅
-                                    txtBaseDayOfMonth.setText(String.valueOf(R.integer.baseDayOfMonthValue));
-                                    setBaseDayOfMonthInfo(R.integer.baseDayOfMonthValue);
                                 }
 
                                 // 월 기준일 비교를 위한 cast
@@ -524,7 +519,7 @@ public class MainActivity extends AppCompatActivity {
                 strBaseTimeSection = "MINUTE";
                 strBaseTime = "0";
                 intBaseAmt = 0;
-                strBaseDayOfMonth = String.valueOf(R.integer.baseDayOfMonthValue);
+                strBaseDayOfMonth = "15";
                 SET_MOD_CHK = false;
             }
 

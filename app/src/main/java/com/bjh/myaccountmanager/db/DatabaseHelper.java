@@ -31,7 +31,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(DatabaseColumns._CREATE1);
         }
 
-        // 버전 2일 경우 daily_info 테이블 근무명 컬럼 추가
         if(oldVersion < 2){
 
             //db.execSQL("ALTER TABLE "+DatabaseColumns._TABLENAME1+" ADD COLUMN "+DatabaseColumns.WORK_NM+" TEXT NOT NULL");
