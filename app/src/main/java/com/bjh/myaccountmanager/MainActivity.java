@@ -8,7 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -101,9 +101,9 @@ public class MainActivity extends AppCompatActivity {
         txtDailyTimes = (EditText) findViewById(R.id.txtDailyTimes);    // 일 근무 시간
         txtDailyAmount = (EditText) findViewById(R.id.txtDailyAmount);  // 일 근무 금액
 
-        chooseYear = Integer.parseInt(StringUtil.getDateYYYYMMDD(calendarView.getDate()).substring(0, 4));          // 선택 년도
-        chooseMonth = Integer.parseInt(StringUtil.getDateYYYYMMDD(calendarView.getDate()).substring(5, 6));         // 선택 월
-        chooseDayOfMonth = Integer.parseInt(StringUtil.getDateYYYYMMDD(calendarView.getDate()).substring(6, 8));    // 선택 일자
+        chooseYear = Integer.parseInt(StringUtil.getCurYear());          // 선택 년도
+        chooseMonth = Integer.parseInt(StringUtil.getCurMonth());         // 선택 월
+        chooseDayOfMonth = Integer.parseInt(StringUtil.getCurDay());    // 선택 일자
 
         databaseHelper = new DatabaseHelper(getApplicationContext());
 
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
                 getTotalInfoToMonth(chooseYear, chooseMonth, chooseDayOfMonth);       // 월 근무 시간 및 근무 금액 조회
 
-                String titleDate = chooseYear + res.getString(R.string.year) +" " + chooseMonth + res.getString(R.string.month) + " " + chooseDayOfMonth + res.getString(R.string.day);
+                String titleDate = chooseYear + res.getString(R.string.year) +" " + (chooseMonth<10?"0"+chooseMonth:chooseMonth) + res.getString(R.string.month) + " " + (chooseDayOfMonth<10?"0"+chooseDayOfMonth:chooseDayOfMonth) + res.getString(R.string.day);
                 String titleMonth = chooseMonth + " " + res.getString(R.string.month) + " ";
 
                 // 달력에 일자 선택 시 상세 정보에 일 세팅
