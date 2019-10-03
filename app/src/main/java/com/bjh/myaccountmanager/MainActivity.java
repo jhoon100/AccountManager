@@ -88,18 +88,18 @@ public class MainActivity extends AppCompatActivity {
 
         res = getResources();
 
-        calendarView = (CalendarView) findViewById(R.id.calendarView);  // CalendarView
+        calendarView = findViewById(R.id.calendarView);  // CalendarView
 
-        btnSave = (Button) findViewById(R.id.btnSave);                  // 저장 버튼
-        btnSetting = (ImageButton) findViewById(R.id.btnSetting);       // 기본 세팅 버튼
-        btnStatistics = (ImageButton) findViewById(R.id.btnStatistics); // 통계 버튼
+        btnSave = findViewById(R.id.btnSave);                  // 저장 버튼
+        btnSetting = findViewById(R.id.btnSetting);       // 기본 세팅 버튼
+        btnStatistics = findViewById(R.id.btnStatistics); // 통계 버튼
 
-        dailyTitle = (TextView) findViewById(R.id.txtDaily);            // 일 상세 타이틀
-        monthTitle = (TextView) findViewById(R.id.monthTitle);          // 월별 근무시간 금액 title
+        dailyTitle = findViewById(R.id.txtDaily);            // 일 상세 타이틀
+        monthTitle = findViewById(R.id.monthTitle);          // 월별 근무시간 금액 title
 
-        txtDailyWork = (EditText) findViewById(R.id.txtDailyWork);      // 일 근무 명
-        txtDailyTimes = (EditText) findViewById(R.id.txtDailyTimes);    // 일 근무 시간
-        txtDailyAmount = (EditText) findViewById(R.id.txtDailyAmount);  // 일 근무 금액
+        txtDailyWork = findViewById(R.id.txtDailyWork);      // 일 근무 명
+        txtDailyTimes = findViewById(R.id.txtDailyTimes);    // 일 근무 시간
+        txtDailyAmount = findViewById(R.id.txtDailyAmount);  // 일 근무 금액
 
         chooseYear = Integer.parseInt(StringUtil.getCurYear());          // 선택 년도
         chooseMonth = Integer.parseInt(StringUtil.getCurMonth());         // 선택 월
@@ -147,11 +147,11 @@ public class MainActivity extends AppCompatActivity {
                     Cursor cursor = db.query(DatabaseColumns._TABLENAME1, new String[]{DatabaseColumns.WORK_NM, DatabaseColumns.WORK_TIME, DatabaseColumns.WORK_AMOUNT}, DatabaseColumns.WORK_DAY+" = ?", new String[]{CHOICE_DAY}, null, null, null);
 
                     // 일 근무 명
-                    txtDailyWork = (EditText) findViewById(R.id.txtDailyWork);
+                    txtDailyWork = findViewById(R.id.txtDailyWork);
                     // 일 근무 시간
-                    txtDailyTimes = (EditText) findViewById(R.id.txtDailyTimes);
+                    txtDailyTimes = findViewById(R.id.txtDailyTimes);
                     // 일 근무 금액
-                    txtDailyAmount = (EditText) findViewById(R.id.txtDailyAmount);
+                    txtDailyAmount = findViewById(R.id.txtDailyAmount);
 
                     if(cursor.getCount() > 0){
                         if(cursor.moveToFirst()){
@@ -394,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
                                         EditText txtBaseTime = settingView.findViewById(R.id.txtBaseTime);  // 기준 시간
                                         EditText txtBaseAmt = settingView.findViewById(R.id.txtBaseAmt);    // 기준 금액
 
-                                        ((EditText)v).requestFocus();   // 기준일 포커스 세팅
+                                        v.requestFocus();   // 기준일 포커스 세팅
                                         txtBaseTime.setFocusable(false);    // 기준 시간 포커스 제거
                                         txtBaseAmt.setFocusable(false);     // 기준 금액 포커스 제거
                                     }
@@ -462,8 +462,8 @@ public class MainActivity extends AppCompatActivity {
         String startDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBaseDayOfMonth), -15, Calendar.DAY_OF_YEAR);
         String endDate = StringUtil.getCalculatorDay(chooseYear, chooseMonth-1, Integer.valueOf(strBaseDayOfMonth), 15, Calendar.DAY_OF_YEAR);
 
-        TextView txtSumTimes = (TextView) findViewById(R.id.txtSumTimes);
-        TextView txtSumAmount = (TextView) findViewById(R.id.txtSumAmount);
+        TextView txtSumTimes = findViewById(R.id.txtSumTimes);
+        TextView txtSumAmount = findViewById(R.id.txtSumAmount);
 
         try{
             db = databaseHelper.getReadableDatabase();
@@ -535,8 +535,8 @@ public class MainActivity extends AppCompatActivity {
      * 월 / 일 시간 명 세팅
      */
     public void setTimeSectionName(){
-        TextView timeComment1 = (TextView) findViewById(R.id.timeComment1);     // 월 시간 명
-        TextView timeComment2 = (TextView) findViewById(R.id.timeComment2);     // 일 시간 명
+        TextView timeComment1 = findViewById(R.id.timeComment1);     // 월 시간 명
+        TextView timeComment2 = findViewById(R.id.timeComment2);     // 일 시간 명
 
         if(strBaseTimeSection != null && strBaseTimeSection.equals("HOUR")){
             timeComment1.setText(R.string.labelHour);   // 시
